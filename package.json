@@ -1,14 +1,38 @@
 {
-  "name": "nodejs_apigate",
+  "name": "lovearth-xdua-nodejs-sdk",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "standard": "./node_modules/.bin/standard ./lib/* | ./node_modules/.bin/snazzy",
+    "fix": "./node_modules/.bin/standard ./lib/* --fix",
+    "prebuild": "rm -rf dist",
+    "build": "npm run prebuild && mkdir dist && babel lib --out-dir dist"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lovearthhome/lovearth-xdua-nodejs-sdk.git"
+  },
+  "keywords": [
+    "xdua"
+  ],
+  "engines": {
+    "node": ">=8"
   },
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/lovearthhome/lovearth-xdua-nodejs-sdk/issues"
+  },
   "dependencies": {
-    "aliyun-api-gateway": "^1.1.4"
+    "aliyun-api-gateway": "^1.1.4",
+    "crypto-js": "^3.1.9-1"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.0.0-beta.49",
+    "@babel/core": "^7.0.0-beta.49",
+    "@babel/preset-env": "^7.0.0-beta.49",
+    "snazzy": "^7.1.1",
+    "standard": "^11.0.1"
   }
 }
