@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "standard": "./node_modules/.bin/standard ./lib/* | ./node_modules/.bin/snazzy",
-    "fix": "./node_modules/.bin/standard ./lib/* --fix",
+    "lint": "./node_modules/.bin/eslint ./lib",
+    "fix": "./node_modules/.bin/eslint ./lib ./config --fix",
     "prebuild": "rm -rf dist",
     "build": "npm run prebuild && mkdir dist && babel lib --out-dir dist"
   },
@@ -26,13 +26,15 @@
   },
   "dependencies": {
     "aliyun-api-gateway": "^1.1.4",
-    "crypto-js": "^3.1.9-1"
+    "crypto-js": "^3.1.9-1",
+    "lodash": "^4.17.10",
+    "util": "^0.11.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.0.0-beta.49",
     "@babel/core": "^7.0.0-beta.49",
     "@babel/preset-env": "^7.0.0-beta.49",
-    "snazzy": "^7.1.1",
-    "standard": "^11.0.1"
+    "babel-eslint": "^8.2.3",
+    "eslint": "^4.19.1"
   }
 }
