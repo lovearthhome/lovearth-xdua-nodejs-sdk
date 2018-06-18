@@ -1,65 +1,108 @@
 "use strict";
 
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.login = login;
+const _ = require('lodash');
 
-var _aliyunApiGateway = require("aliyun-api-gateway");
+const ArgumentError = require('./exceptions/ArgumentError');
 
-var _cryptoJs = _interopRequireDefault(require("crypto-js"));
+const Sign = require('./utils/Sign');
 
-var _lodash = _interopRequireDefault(require("lodash"));
+const {
+  generateSign
+} = Sign();
 
-var _ArgumentError = _interopRequireDefault(require("./exceptions/ArgumentError"));
+const md5 = require('./utils/md5');
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+const {
+  APPLICATION_JSON,
+  APPLICATION_X_WWW_FORM_URLENCODED
+} = require('./constants/contentType');
 
-const client = new _aliyunApiGateway.Client('24772094', '5f4521e0989db4aa0b30b5a716a8b33b'); // TODO !important: Should set up an https server
+const {
+  APIV,
+  API_END_POINT,
+  setAppKey,
+  getAppKey,
+  setAppSecret,
+  getAppSecret,
+  getDuaId
+} = require('./constants');
 
-const API_END_POINT = 'http://api.xdua.com';
-const INITIAL_DUA = '16fc397a75a4265040875ced14121147';
-/**
- * Login Method
- *
- * @param {String} username The phone number of the registered user, should be like '15810419011'.
- *  There should not be any ' ' or '-' between the digit
- * @param {String} password the password of the user
- * @returns {Promise<*>} the promise of the login status
- */
+const {
+  initializeDuaId
+} = require('./duaId');
 
-async function login({
-  username,
-  password
+const aliYunClient = require('./aliyunClient');
+
+function lovearth({
+  APP_SECRET,
+  APP_KEY
 }) {
-  if (_lodash.default.isNil(username) || typeof username !== 'string') {
-    throw new _ArgumentError.default('String Type Field: username is required');
+  setAppKey(APP_KEY);
+  setAppSecret(APP_SECRET);
+
+  async function initialize() {
+    let promiseList = [];
+    promiseList.push(initializeDuaId());
+    return Promise.all(promiseList);
   }
+  /**
+   * Login Method
+   *
+   * @param {String} username The phone number of the registered user, should be like '15810419011'.
+   *  There should not be any ' ' or '-' between the digit
+   * @param {String} password the password of the user
+   * @returns {Promise<*>} the promise of the login status
+   */
 
-  if (_lodash.default.isNil(password) || typeof password !== 'string') {
-    throw new _ArgumentError.default('String Type Field: password is required');
-  }
 
-  const url = API_END_POINT + '/login'; // Add '+86-' to the username, since we currently only support registration from China mainland
-
-  let formattedUsername = '+86-' + username; // Use md5 to hash the password
-
-  let passwordMD5 = _cryptoJs.default.MD5(password).toString();
-
-  return client.post(url, {
-    headers: {
-      'accept': 'application/json',
-      'content-type': 'application/x-www-form-urlencoded; charset=UTF-8',
-      'dua': INITIAL_DUA,
-      'apiv': '1.0.0'
-    },
-    signHeaders: {
-      'X-Ca-Stage': 'RELEASE'
-    },
-    data: {
-      by: 'tel',
-      ustr: formattedUsername,
-      pwd: passwordMD5
+  async function login({
+    username,
+    password
+  }) {
+    if (_.isNil(username) || typeof username !== 'string') {
+      throw new ArgumentError('String Type Field: username is required');
     }
-  });
+
+    if (_.isNil(password) || typeof password !== 'string') {
+      throw new ArgumentError('String Type Field: password is required');
+    }
+
+    const API_PATH = '/login';
+    const url = API_END_POINT + API_PATH; // Add '+86-' to the username, since we currently only support registration from China mainland
+
+    let formattedUsername = '+86-' + username;
+    const headers = {
+      'accept': APPLICATION_JSON,
+      'content-type': APPLICATION_X_WWW_FORM_URLENCODED,
+      'dua': getDuaId(),
+      'apiv': APIV // Use md5 to hash the password
+
+    };
+    let passwordMD5 = md5(password);
+    return aliYunClient.post(url, {
+      headers: Object.assign({}, headers, {
+        'sign': generateSign({
+          'method': 'POST',
+          'path': API_PATH,
+          'appSecret': APP_SECRET,
+          'appKey': APP_KEY
+        })
+      }),
+      signHeaders: {
+        'X-Ca-Stage': 'RELEASE'
+      },
+      data: {
+        by: 'tel',
+        ustr: formattedUsername,
+        pwd: passwordMD5
+      }
+    });
+  }
+
+  return {
+    login,
+    initialize
+  };
 }
+
+module.exports = lovearth;

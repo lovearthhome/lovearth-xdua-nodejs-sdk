@@ -4,3 +4,6 @@ test/
 *.DS_Store
 .idea
 lib/
+demo/index.js
+demo/option.js
+demo/option-example.js
