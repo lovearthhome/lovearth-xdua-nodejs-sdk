@@ -24,6 +24,7 @@ const {
   getAppKey,
   setAppSecret,
   getAppSecret,
+  setDuaId,
   getDuaId
 } = require('./constants');
 
@@ -51,7 +52,7 @@ function lovearth({
    * @param {String} username The phone number of the registered user, should be like '15810419011'.
    *  There should not be any ' ' or '-' between the digit
    * @param {String} password the password of the user
-   * @returns {Promise<*>} the promise of the login status
+   * @returns {Object<*>} the result of the login. If failed, return the reason of the failure
    */
 
 
@@ -79,7 +80,8 @@ function lovearth({
 
     };
     let passwordMD5 = md5(password);
-    return aliYunClient.post(url, {
+    let res = await aliYunClient.post({
+      url,
       headers: Object.assign({}, headers, {
         'sign': generateSign({
           'method': 'POST',
@@ -91,12 +93,25 @@ function lovearth({
       signHeaders: {
         'X-Ca-Stage': 'RELEASE'
       },
-      data: {
+      params: {
         by: 'tel',
         ustr: formattedUsername,
         pwd: passwordMD5
       }
     });
+    const {
+      data
+    } = res;
+
+    if (data.status === 0) {
+      let {
+        duaId
+      } = data.result;
+      setDuaId(duaId);
+      return data.result;
+    } else {
+      throw new Error(data.reason);
+    }
   }
 
   return {

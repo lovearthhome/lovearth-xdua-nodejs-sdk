@@ -1,7 +1,8 @@
 "use strict";
 
 const {
-  APPLICATION_X_WWW_FORM_URLENCODED
+  APPLICATION_X_WWW_FORM_URLENCODED,
+  APPLICATION_JSON
 } = require('../constants/contentType');
 
 const {
@@ -19,7 +20,7 @@ const {
 const aliYunClient = require('../aliyunClient');
 
 async function getDuaId(model = 'unknown', man = 'unknown', os = 'unknown') {
-  let data = {
+  let params = {
     dsn: '',
     type: 'browser',
     model,
@@ -42,22 +43,24 @@ async function getDuaId(model = 'unknown', man = 'unknown', os = 'unknown') {
       'appKey': getAppKey()
     })
   };
-  return aliYunClient.post(API_END_POINT + API_PATH, {
+  return aliYunClient.post({
+    url: API_END_POINT + API_PATH,
     headers,
-    data
+    params
   });
 }
 
 async function initializeDuaId() {
   const res = await getDuaId();
+  const data = res.data;
 
-  if (res.status !== 0) {
+  if (data.status !== 0) {
     throw new Error('fail to get duaId');
   }
 
   const {
     dua_id
-  } = res.result;
+  } = data.result;
   setDuaId(dua_id);
 }
 

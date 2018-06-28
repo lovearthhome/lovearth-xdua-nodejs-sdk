@@ -1,4 +1,4 @@
-const lovearth = require('../index')
+const lovearth = require('../dist')
 
 const {
   APP_SECRET,
@@ -8,16 +8,32 @@ const {
 } = require('./option')
 
 
-let le = lovearth({
+const dua = lovearth({
   APP_SECRET: APP_SECRET,
   APP_KEY: APP_KEY,
 })
 
-le.initialize().then(() => {
-  le.login({
-    username: username,
-    password: password,
-  }).then(res => {
+async function demo() {
+  try {
+    await dua.initialize()
+    let res = await dua.login({
+      username: username,
+      password: password,
+    })
     console.log(res)
-  })
-})
+  } catch (e) {
+    console.log('login failed handle')
+    console.log(e)
+  }
+}
+demo()
+// dua.initialize().then(() => {
+//   dua.login({
+//     username: username,
+//     password: password,
+//   }).then(res => {
+//     console.log(res)
+//   }).catch(err => {
+//     console.log(err)
+//   })
+// })
