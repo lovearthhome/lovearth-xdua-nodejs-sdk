@@ -105,7 +105,7 @@ function lovearth({
 
     if (data.status === 0) {
       let {
-        duaId
+        dua_id
       } = data.result;
       setDuaId(duaId);
       return data.result;

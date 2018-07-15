@@ -59,9 +59,9 @@ async function initializeDuaId() {
   }
 
   const {
-    dua_id
+    id
   } = data.result;
-  setDuaId(dua_id);
+  setDuaId(id);
 }
 
 module.exports = {
